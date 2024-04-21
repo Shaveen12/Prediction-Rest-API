@@ -31,17 +31,18 @@ def stats():
     return json_output
 
 data = pd.read_csv('./cleaned_healthcare_dataset.csv')
-    # Convert 'Date of Admission' to datetime
-# Convert 'Date of Admission' to datetime format
 data['Date of Admission'] = pd.to_datetime(data['Date of Admission'])
 
 # Filter data for the latest month
 latest_month = data['Date of Admission'].dt.to_period("M").max()
 filtered_df = data[data['Date of Admission'].dt.to_period("M") == latest_month]
 
-# Group by 'Area' and 'Medical Condition' and count the number of patients
-result = filtered_df.groupby(['Area', 'Medical Condition']).size().reset_index(name='Number of Patients')
-json_output2 = result.to_json(orient='index')
+# Pivot the DataFrame
+pivot_df = filtered_df.pivot_table(index='Area', columns='Medical Condition', aggfunc='size', fill_value=0)
+
+# Rename the columns to remove spaces
+pivot_df.columns = [col.replace(' ', '_') for col in pivot_df.columns]
+json_output2 = pivot_df.to_json(orient='index')
 
 
 
