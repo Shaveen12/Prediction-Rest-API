@@ -81,7 +81,7 @@ for (area, condition), genders in pivot_table.iterrows():
 # Step 7: Convert the dictionary to a JSON string with proper formatting
 json_output3 = json.dumps(json_structure, indent=4)
 
-@app.route(/picharts, methods = ['GET'])
+@app.route('/picharts', methods = ['GET'])
 @auth.login_required
 def piCharts():
     return json_output3
