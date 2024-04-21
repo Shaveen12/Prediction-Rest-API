@@ -32,31 +32,16 @@ def stats():
 
 data = pd.read_csv('./cleaned_healthcare_dataset.csv')
     # Convert 'Date of Admission' to datetime
+# Convert 'Date of Admission' to datetime format
 data['Date of Admission'] = pd.to_datetime(data['Date of Admission'])
 
-# Filter relevant columns
-data = data[['Date of Admission', 'Medical Condition', 'Area']]
+# Filter data for the latest month
+latest_month = data['Date of Admission'].dt.to_period("M").max()
+filtered_df = data[data['Date of Admission'].dt.to_period("M") == latest_month]
 
-medical_conditions = data['Medical Condition'].unique().tolist()
-areas = data['Area'].unique().tolist()
-
-# Group by 'Date of Admission', 'Medical Condition', and 'Hospital' and count admissions
-grouped_data = data.groupby(['Date of Admission', 'Medical Condition', 'Area']).size().reset_index(name='Admissions')
-
-# Pivot the data to have 'Medical Condition' as columns
-pivot_data = grouped_data.pivot_table(index=['Date of Admission', 'Area'], columns='Medical Condition', values='Admissions', fill_value=0).reset_index()
-
-# Set 'Date of Admission' as index
-pivot_data.set_index('Date of Admission', inplace=True)
-pivot_data.index = pivot_data.index.month
-
-# Find the max date in the index
-max_date = pivot_data.index.max()
-
-# Filter the data for the max date
-latest_data = pivot_data.loc[pivot_data.index == max_date]
-area_grouped = latest_data.groupby('Area').sum()
-json_output2 = area_grouped.to_json(orient='index')
+# Group by 'Area' and 'Medical Condition' and count the number of patients
+result = filtered_df.groupby(['Area', 'Medical Condition']).size().reset_index(name='Number of Patients')
+json_output2 = result.to_json(orient='index')
 
 
 
